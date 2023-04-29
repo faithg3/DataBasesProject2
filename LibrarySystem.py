@@ -78,8 +78,8 @@ def AddNewBookInterface():
     publisher_label.grid(row =2, column = 0)
 
     # create buttons
-    getLibCard_btn = Button(addNewBookFrame, text ='Add Book ')
-    getLibCard_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+    addNewBook_btn = Button(addNewBookFrame, text ='Add Book ')
+    addNewBook_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
 #                                      CHECK BOOK AVALIABLITY FRAME INTERFACE
@@ -92,8 +92,8 @@ def CheckBookAvaliabilityInterface():
     title_label = Label(checkBookAvaliabilityFrame, text = 'Book Title: ')
     title_label.grid(row =1, column = 0)
 
-    getLibCard_btn = Button(checkBookAvaliabilityFrame, text ='Check Avaliability ')
-    getLibCard_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+    checkBookAvailablity_btn = Button(checkBookAvaliabilityFrame, text ='Check Avaliability ')
+    checkBookAvailablity_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
 #                                          CHECK LATE BOOKS FRAME INTERFACE
@@ -111,15 +111,51 @@ def CheckLateBooksInterface():
     date_end_label = Label(checkLateBooksFrame, text = 'Start End: ')
     date_end_label.grid(row =2, column = 0)
 
-    getLibCard_btn = Button(checkLateBooksFrame, text ='View Late Books ')
-    getLibCard_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+    checkLateBooks_btn = Button(checkLateBooksFrame, text ='View Late Books ')
+    checkLateBooks_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 #                                           LIST BORROWER FRAME INTERFACE
-#def listBorrowerInterface():
+def listBorrowerInterface():
+    # create text boxes and labels
+    infoLabelText = 'Search Borrowers\' late fees!\nEnter a borrower\'s ID or name to filter search results.'
+    info = Label(listBorrowerFrame, text = infoLabelText)
+    info.grid(row = 0, column = 1, pady = 20)
+
+    borrower_id = Entry(listBorrowerFrame, width = 30)
+    borrower_id.grid(row = 1, column = 1)
+    borrower_id_label = Label(listBorrowerFrame, text = 'Borrower ID: ')
+    borrower_id_label.grid(row =1, column = 0)
+
+    name = Entry(listBorrowerFrame, width = 30)
+    name.grid(row = 2, column = 1)
+    name_label = Label(listBorrowerFrame, text = 'Name: ')
+    name_label.grid(row =2, column = 0)
+
+    # create buttons
+    listBorrowers_btn = Button(listBorrowerFrame, text ='View Borrowers ')
+    listBorrowers_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
 #                                             LIST BOOK FRAME INTERFACE
-#def listBookInterface():
+def listBookInterface():
+    # create text boxes and labels
+    infoLabelText = 'Search Book Information!\nEnter the Book ID, Book Title to filter search results.'
+    info = Label(listBookFrame, text = infoLabelText)
+    info.grid(row = 0, column = 1, pady = 20)
+
+    book_id = Entry(listBookFrame, width = 30)
+    book_id.grid(row = 1, column = 1)
+    book_id_label = Label(listBookFrame, text = 'Borrower ID: ')
+    book_id_label.grid(row =1, column = 0)
+
+    title = Entry(listBookFrame, width = 30)
+    title.grid(row = 2, column = 1)
+    title_label = Label(listBookFrame, text = 'Book Title: ')
+    title_label.grid(row =2, column = 0)
+
+    # create buttons
+    listBorrowers_btn = Button(listBookFrame, text ='Search Book Information ')
+    listBorrowers_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
 #######################################################################################################################
@@ -192,8 +228,8 @@ GetLibraryCardInterface()
 AddNewBookInterface()
 CheckBookAvaliabilityInterface()
 CheckLateBooksInterface()
-#listBorrowerInterface()
-#listBookInterface()
+listBorrowerInterface()
+listBookInterface()
 
 
 
