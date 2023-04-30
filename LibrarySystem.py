@@ -33,7 +33,8 @@ def CheckOutBookInterface():
     card_no_label.grid(row =3, column = 0)
 
     # create buttons
-    checkout_btn = Button(checkOutBookFrame, text ='Checkout Book ')
+    checkout_btn = Button(checkOutBookFrame, text ='Checkout Book ', command=lambda: bookCheckoutQuery(book_id, branch_id, card_no))
+    # checkout_btn = Button(checkOutBookFrame, text ='Checkout Book ', command=bookCheckoutQuery(book_id, branch_id, card_no))
     checkout_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
@@ -168,9 +169,48 @@ def listBookInterface():
 #                                                  BUTTON FUNCTIONS
 #######################################################################################################################
 
+#                                                CHECK OUT BOOK QUERY
+def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
+    # create connection and cursor to the DB
+    bcq_connect = sqlite3.connect('LMS.sqlite')
+    bcq_cursor = bcq_connect.cursor()
 
+    # Insert borrower into Book_Loans
+    sql_insert = "INSERT INTO Book_Loans(Book_Id, Branch_Id, Card_No, Date_Out) VALUES (?, ?, ?, DATE('now'))"
+    val_insert = (Book_Id.get(), Branch_Id.get(), Card_No.get(),)
+    bcq_cursor.execute(sql_insert, val_insert)
 
-# button function here
+    # Update Book_Copies with new No_Of_Copies
+    sql_update = "UPDATE Book_Copies SET No_Of_Copies = No_Of_Copies - 1 WHERE Book_Id=? AND Branch_Id=?"
+    val_update = (Book_Id.get(), Branch_Id.get(),)
+    bcq_cursor.execute(sql_update, val_update)
+
+    #commit changes
+    bcq_connect.commit()
+
+    # Get updated No_Of_Copies from Book_Copies
+    sql_output = "SELECT * FROM Book_Copies WHERE Book_Id=? AND Branch_Id=?"
+    val_output = (Book_Id.get(), Branch_Id.get(),)
+    bcq_cursor.execute(sql_output, val_output)
+
+    output_records = bcq_cursor.fetchall()
+    
+    # Output updates onto interface
+    print_record = ''
+
+    for output_record in output_records:
+        print_record += str("Book_ID:      " + str(output_record[0]) + '\n')
+        print_record += str("Branch_ID:    " + str(output_record[1]) + '\n')
+        print_record += str("No_Of_Copies: " + str(output_record[2]) + '\n')
+
+    bcq_label = Label(checkOutBookFrame, text = print_record)
+    bcq_label.grid(row = 9, column = 0, columnspan = 2)
+
+	#commit changes
+    bcq_connect.commit()
+
+	#close the DB connection
+    bcq_connect.close()
 
 
 
@@ -188,7 +228,7 @@ root = Tk()
 root.title('LibrarySystem')
 root.geometry("700x500")
 
-library_system_connect = sqlite3.connect('librarysystem.db')
+library_system_connect = sqlite3.connect('LMS.sqlite')
 library_system_cur = library_system_connect.cursor()
 
 # create notebook
