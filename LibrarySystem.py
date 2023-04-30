@@ -82,6 +82,7 @@ def AddNewBookInterface():
     addNewBook_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
+
 #                                      CHECK BOOK AVALIABLITY FRAME INTERFACE
 def CheckBookAvaliabilityInterface():
     info = Label(checkBookAvaliabilityFrame, text='Enter the Book Title to see its avaliability!')
@@ -92,8 +93,9 @@ def CheckBookAvaliabilityInterface():
     title_label = Label(checkBookAvaliabilityFrame, text = 'Book Title: ')
     title_label.grid(row =1, column = 0)
 
-    checkBookAvailablity_btn = Button(checkBookAvaliabilityFrame, text ='Check Avaliability ')
+    checkBookAvailablity_btn = Button(checkBookAvaliabilityFrame, text ='Check Avaliability ',  command=lambda:copies_loaned_out_query(title.get()))
     checkBookAvailablity_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+
 
 
 #                                          CHECK LATE BOOKS FRAME INTERFACE
@@ -193,7 +195,7 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_cursor.execute(sql_output, val_output)
 
     output_records = bcq_cursor.fetchall()
-    
+
     # Output updates onto interface
     print_record = ''
 
@@ -232,7 +234,7 @@ def newLibraryCardQuery(Name, Address, Phone):
     nlcq_cursor.execute(sql_output, val_output)
 
     output_records = nlcq_cursor.fetchall()
-    
+
     # Output updates onto interface
     print_record = ''
 
@@ -247,6 +249,47 @@ def newLibraryCardQuery(Name, Address, Phone):
 
 	#close the DB connection
     nlcq_connect.close()
+
+
+#                                                                            COPIES LOANED OUT BUTTON
+def copies_loaned_out_query(book_title):
+    conn = sqlite3.connect('LMS.sqlite')
+    cur = conn.cursor()
+
+    # Get the book id for the given book title
+    sql_book_id = "SELECT Book_Id FROM BOOK WHERE Title = ?"
+    val_book_id = (book_title,)
+    cur.execute(sql_book_id, val_book_id)
+    book_id = cur.fetchone()
+
+    if book_id is None:
+        print("Book not found in the database")
+        return
+
+    book_id = book_id[0]
+
+    # Get the number of copies loaned out per branch
+    sql_output = "SELECT Branch_Id, COUNT(*) AS Copies_Loaned_Out FROM BOOK_LOANS WHERE Book_Id = ?"
+    val_output = (book_id,)
+    cur.execute(sql_output, val_output)
+
+    output_records = cur.fetchall()
+
+    # Print the number of copies loaned out per branch
+    print("Number of copies loaned out per branch for book '{}':".format(book_title))
+    for output_record in output_records:
+        print("Branch {}: {}".format(output_record[0], output_record[1]))
+
+    # Close the connection
+    conn.close()
+
+
+
+
+
+
+
+
 
 #######################################################################################################################
 
