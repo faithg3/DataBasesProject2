@@ -239,8 +239,8 @@ def newLibraryCardQuery(Name, Address, Phone):
     for output_record in output_records:
         print_record = str("Your new Library Card Number is " + str(output_record[0]) + '!\n')
 
-    bcq_label = Label(getLibraryCardFrame, text = print_record)
-    bcq_label.grid(row = 9, column = 0, columnspan = 2)
+    nlcq_label = Label(getLibraryCardFrame, text = print_record)
+    nlcq_label.grid(row = 9, column = 0, columnspan = 2)
 
 	#commit changes
     nlcq_connect.commit()
