@@ -176,36 +176,67 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_connect = sqlite3.connect('LMS.sqlite')
     bcq_cursor = bcq_connect.cursor()
 
-    # Insert book into Book_Loans
-    sql_insert = "INSERT INTO Book_Loans(Book_Id, Branch_Id, Card_No, Date_Out) VALUES (?, ?, ?, DATE('now'))"
-    val_insert = (Book_Id.get(), Branch_Id.get(), Card_No.get(),)
-    bcq_cursor.execute(sql_insert, val_insert)
+    # Check if enough copies of book available
+    sql_check_copies = 'SELECT IIF(No_of_Copies>0, 1, 0) FROM Book_Copies WHERE Book_Id=? and Branch_Id=?;'
+    val_check_copies = (Book_Id.get(), Branch_Id.get(),)
+    bcq_cursor.execute(sql_check_copies, val_check_copies)
 
-    # Update Book_Copies with new No_Of_Copies
-    sql_update = "UPDATE Book_Copies SET No_Of_Copies = No_Of_Copies - 1 WHERE Book_Id=? AND Branch_Id=?"
-    val_update = (Book_Id.get(), Branch_Id.get(),)
-    bcq_cursor.execute(sql_update, val_update)
-
-    #commit changes
-    bcq_connect.commit()
-
-    # Get updated No_Of_Copies from Book_Copies
-    sql_output = "SELECT * FROM Book_Copies WHERE Book_Id=? AND Branch_Id=?"
-    val_output = (Book_Id.get(), Branch_Id.get(),)
-    bcq_cursor.execute(sql_output, val_output)
-
-    output_records = bcq_cursor.fetchall()
-
-    # Output updates onto interface
+    valid_copies = bcq_cursor.fetchone()
     print_record = ''
 
-    for output_record in output_records:
-        print_record += str("Book_ID:      " + str(output_record[0]) + '\n')
-        print_record += str("Branch_ID:    " + str(output_record[1]) + '\n')
-        print_record += str("No_Of_Copies: " + str(output_record[2]) + '\n')
+    # Print message if not enough copies available
+    if not valid_copies:
+        print_record += str('Not enough copies of Book ID {} available at Branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
+    
+    else:
+        # Check if unique information entered
+        sql_check_unique = 'SELECT EXISTS (SELECT 1 FROM Book_Loans WHERE Book_Id=? and Branch_Id=? and Card_No=?);'
+        val_check_unique = (Book_Id.get(), Branch_Id.get(), Card_No.get(),)
+        bcq_cursor.execute(sql_check_unique, val_check_unique)
 
+        info_exists = bcq_cursor.fetchone()
+        info_exists = info_exists[0]
+
+        print('info exists : {}'.format(info_exists))
+
+        # Print message if duplicate information entered
+        if info_exists == 1:
+            print_record += str('You have already checked out book {} from branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
+
+        # Update DB if unique information entered
+        else:
+            # Insert book into Book_Loans
+            sql_insert = "INSERT INTO Book_Loans(Book_Id, Branch_Id, Card_No, Date_Out) VALUES (?, ?, ?, DATE('now'))"
+            val_insert = (Book_Id.get(), Branch_Id.get(), Card_No.get(),)
+            bcq_cursor.execute(sql_insert, val_insert)
+
+            # Update Book_Copies with new No_Of_Copies
+            sql_update = "UPDATE Book_Copies SET No_Of_Copies = No_Of_Copies - 1 WHERE Book_Id=? AND Branch_Id=?"
+            val_update = (Book_Id.get(), Branch_Id.get(),)
+            bcq_cursor.execute(sql_update, val_update)
+
+            #commit changes
+            bcq_connect.commit()
+
+            # Get updated No_Of_Copies from Book_Copies
+            sql_output = "SELECT * FROM Book_Copies WHERE Book_Id=? AND Branch_Id=?"
+            val_output = (Book_Id.get(), Branch_Id.get(),)
+            bcq_cursor.execute(sql_output, val_output)
+
+            output_records = bcq_cursor.fetchall()
+
+            # Output updates onto interface
+            for output_record in output_records:
+                print_record += str("Book_ID:      " + str(output_record[0]) + '\n')
+                print_record += str("Branch_ID:    " + str(output_record[1]) + '\n')
+                print_record += str("No_Of_Copies: " + str(output_record[2]) + '\n')
+
+    # Output updates onto interface
     bcq_label = Label(checkOutBookFrame, text = print_record)
     bcq_label.grid(row = 9, column = 0, columnspan = 2)
+
+    # Message disappears after 5 seconds
+    bcq_label.after(5000, bcq_label.destroy)
 
 	#commit changes
     bcq_connect.commit()
@@ -256,29 +287,37 @@ def copies_loaned_out_query(book_title):
     conn = sqlite3.connect('LMS.sqlite')
     cur = conn.cursor()
 
-    # Get the book id for the given book title
-    sql_book_id = "SELECT Book_Id FROM BOOK WHERE Title = ?"
+    # Get the book id for the given book title (case insensitive)
+    sql_book_id = "SELECT Book_Id FROM BOOK WHERE Title = ? COLLATE NOCASE"
     val_book_id = (book_title,)
     cur.execute(sql_book_id, val_book_id)
     book_id = cur.fetchone()
 
+    print_record = ''
+
     if book_id is None:
-        print("Book not found in the database")
-        return
+        print_record += str("Book not found in the database\n")
 
-    book_id = book_id[0]
+    else:
+        book_id = book_id[0]
 
-    # Get the number of copies loaned out per branch
-    sql_output = "SELECT Branch_Id, COUNT(*) AS Copies_Loaned_Out FROM BOOK_LOANS WHERE Book_Id = ?"
-    val_output = (book_id,)
-    cur.execute(sql_output, val_output)
+        # Get the number of copies loaned out per branch
+        sql_output = "SELECT Branch_Id, COUNT(*) AS Copies_Loaned_Out FROM BOOK_LOANS WHERE Book_Id = ?"
+        val_output = (book_id,)
+        cur.execute(sql_output, val_output)
 
-    output_records = cur.fetchall()
+        output_records = cur.fetchall()
 
-    # Print the number of copies loaned out per branch
-    print("Number of copies loaned out per branch for book '{}':".format(book_title))
-    for output_record in output_records:
-        print("Branch {}: {}".format(output_record[0], output_record[1]))
+        # Print the number of copies loaned out per branch
+        print_record += str("Number of copies loaned out per branch for book '{}':\n".format(book_title))
+        for output_record in output_records:
+            print_record += str("Branch {}: {}\n".format(output_record[0], output_record[1]))
+
+    # Output updates onto interface
+    label = Label(checkBookAvaliabilityFrame, text = print_record)
+    label.grid(row = 9, column = 0, columnspan = 2)
+
+    label.after(5000, label.destroy)
 
     # Close the connection
     conn.close()
