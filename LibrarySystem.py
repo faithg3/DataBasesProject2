@@ -77,8 +77,13 @@ def AddNewBookInterface():
     publisher_label = Label(addNewBookFrame, text = 'Publisher: ')
     publisher_label.grid(row =2, column = 0)
 
+    author = Entry(addNewBookFrame, width = 30)
+    author.grid(row = 3, column = 1)
+    author_label = Label(addNewBookFrame, text = 'Author: ')
+    author_label.grid(row =3, column = 0)
+
     # create buttons
-    addNewBook_btn = Button(addNewBookFrame, text ='Add Book ')
+    addNewBook_btn = Button(addNewBookFrame, text ='Add Book ', command=lambda: addNewBookQuery(title.get(), publisher.get(), author.get()))
     addNewBook_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
@@ -182,6 +187,7 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_cursor.execute(sql_check_copies, val_check_copies)
 
     valid_copies = bcq_cursor.fetchone()
+    valid_copies = valid_copies[0]
     print_record = ''
 
     # Print message if not enough copies available
@@ -282,7 +288,86 @@ def newLibraryCardQuery(Name, Address, Phone):
     nlcq_connect.close()
 
 
-#                                                                            COPIES LOANED OUT BUTTON
+#                                                 ADD NEW BOOK BUTTON
+def addNewBookQuery(title, publisher, author):
+    # create connection and cursor to the DB
+    nbq_connect = sqlite3.connect('LMS.sqlite')
+    nbq_cursor = nbq_connect.cursor()
+
+    # Check if entered new publisher entered
+    sql_check_publisher = "SELECT EXISTS (SELECT 1 FROM PUBLISHER WHERE Publisher_Name=? COLLATE NOCASE);"
+    val_check_publisher = (publisher,)
+    nbq_cursor.execute(sql_check_publisher, val_check_publisher)
+
+    publisher_exists = nbq_cursor.fetchone()
+    publisher_exists = publisher_exists[0]
+    print_record = ''
+
+    if publisher_exists == 1:
+        # update publisher with correct case
+        sql_get_publisher = "SELECT Publisher_Name FROM PUBLISHER WHERE Publisher_Name=? COLLATE NOCASE;"
+        val_get_publisher = (publisher,)
+        nbq_cursor.execute(sql_get_publisher, val_get_publisher)
+
+        publisher_name = nbq_cursor.fetchone()
+        publisher = publisher_name[0]
+    
+    # Add book information to BOOK
+    sql_add_book = "INSERT INTO BOOK(Title, Publisher_Name) VALUES (?, ?);"
+    val_add_book = (title, publisher,)
+    nbq_cursor.execute(sql_add_book, val_add_book)
+
+    # Get Book ID of new book
+    sql_get_book_id = "SELECT Book_Id FROM BOOK WHERE Title=? and Publisher_Name=?;"
+    val_get_book_id = (title, publisher,)
+    nbq_cursor.execute(sql_get_book_id, val_get_book_id)
+
+    book_id = nbq_cursor.fetchone()
+    book_id = book_id[0]
+
+    # Check if book info already added in database
+    sql_check_author = "SELECT EXISTS(SELECT 1 FROM Book_Authors WHERE Book_Id=? AND Author_Name=?);"
+    val_check_author = (book_id, author,)
+    nbq_cursor.execute(sql_check_author, val_check_author)
+
+    author_exists = nbq_cursor.fetchone()
+    author_exists = author_exists[0]
+
+    # Print eror message if duplicate addition
+    if author_exists == 1:
+        print_record += str('{} by {} has already been added in the database!\n'.format(title, author))
+
+    # Add data to DB if new information entered
+    else:
+        print_record += str('Added a new book \"{}\" with ID# = {}!\n'.format(title, book_id))
+
+        # Add Author info to Book_Authors
+        sql_add_author = "INSERT INTO Book_Authors VALUES (?, ?);"
+        val_add_author = (book_id, author,)
+        nbq_cursor.execute(sql_add_author, val_add_author)
+        print_record += str('Added {} as an author of \"{}\"!\n'.format(author, title))
+
+        # Add 5 copies of the book into each branch in Book_Copies
+        sql_add_copies = "INSERT INTO Book_Copies VALUES (?, 1, 5), (?, 2, 5), (?, 3, 5), (?, 4, 5), (?, 5, 5);"
+        val_add_copies = (book_id, book_id, book_id, book_id, book_id,)
+        nbq_cursor.execute(sql_add_copies, val_add_copies)
+        print_record += str('Added 5 copies of \"{}\" to each branch!\n'.format(title))
+
+    # Output updates onto interface
+    nbq_label = Label(addNewBookFrame, text = print_record)
+    nbq_label.grid(row = 9, column = 0, columnspan = 2)
+
+    # Message disappears after 10 seconds
+    nbq_label.after(10000, nbq_label.destroy)
+
+	#commit changes
+    nbq_connect.commit()
+
+	#close the DB connection
+    nbq_connect.close()
+
+
+#                                               COPIES LOANED OUT BUTTON
 def copies_loaned_out_query(book_title):
     conn = sqlite3.connect('LMS.sqlite')
     cur = conn.cursor()
@@ -317,14 +402,23 @@ def copies_loaned_out_query(book_title):
     label = Label(checkBookAvaliabilityFrame, text = print_record)
     label.grid(row = 9, column = 0, columnspan = 2)
 
+    # Message disappears after 5 seconds
     label.after(5000, label.destroy)
 
     # Close the connection
     conn.close()
 
 
+#                                                  LATE BOOKS BUTTON
+# def lateBooksQuery()
 
 
+#                                                BORROWER INFO BUTTON
+# def borrowerInfoQuery()
+
+
+#                                                  BOOK INFO BUTTON
+# def bookInfoQuery()
 
 
 
