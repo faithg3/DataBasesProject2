@@ -34,7 +34,6 @@ def CheckOutBookInterface():
 
     # create buttons
     checkout_btn = Button(checkOutBookFrame, text ='Checkout Book ', command=lambda: bookCheckoutQuery(book_id, branch_id, card_no))
-    # checkout_btn = Button(checkOutBookFrame, text ='Checkout Book ', command=bookCheckoutQuery(book_id, branch_id, card_no))
     checkout_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
@@ -59,7 +58,7 @@ def GetLibraryCardInterface():
     phone_label.grid(row =3, column = 0)
 
     # create buttons
-    getLibCard_btn = Button(getLibraryCardFrame, text ='Get Library Card ')
+    getLibCard_btn = Button(getLibraryCardFrame, text ='Get Library Card ', command=lambda: newLibraryCardQuery(name, address, phone))
     getLibCard_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
@@ -169,13 +168,13 @@ def listBookInterface():
 #                                                  BUTTON FUNCTIONS
 #######################################################################################################################
 
-#                                                CHECK OUT BOOK QUERY
+#                                                CHECK OUT BOOK BUTTON
 def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     # create connection and cursor to the DB
     bcq_connect = sqlite3.connect('LMS.sqlite')
     bcq_cursor = bcq_connect.cursor()
 
-    # Insert borrower into Book_Loans
+    # Insert book into Book_Loans
     sql_insert = "INSERT INTO Book_Loans(Book_Id, Branch_Id, Card_No, Date_Out) VALUES (?, ?, ?, DATE('now'))"
     val_insert = (Book_Id.get(), Branch_Id.get(), Card_No.get(),)
     bcq_cursor.execute(sql_insert, val_insert)
@@ -213,6 +212,41 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_connect.close()
 
 
+#                                               NEW LIBRARY CARD BUTTON
+def newLibraryCardQuery(Name, Address, Phone):
+    # create connection and cursor to the DB
+    nlcq_connect = sqlite3.connect('LMS.sqlite')
+    nlcq_cursor = nlcq_connect.cursor()
+
+    # Insert Borrower into BORROWER
+    sql_insert = "INSERT INTO Borrower(Name, Address, Phone) VALUES (?, ?, ?)"
+    val_insert = (Name.get(), Address.get(), Phone.get(),)
+    nlcq_cursor.execute(sql_insert, val_insert)
+
+    #commit changes
+    nlcq_connect.commit()
+
+    # Get new Card_No from Borrower
+    sql_output = "SELECT Card_No FROM Borrower WHERE Name=? AND Address=? AND Phone=?"
+    val_output = (Name.get(), Address.get(), Phone.get(),)
+    nlcq_cursor.execute(sql_output, val_output)
+
+    output_records = nlcq_cursor.fetchall()
+    
+    # Output updates onto interface
+    print_record = ''
+
+    for output_record in output_records:
+        print_record = str("Your new Library Card Number is " + str(output_record[0]) + '!\n')
+
+    bcq_label = Label(getLibraryCardFrame, text = print_record)
+    bcq_label.grid(row = 9, column = 0, columnspan = 2)
+
+	#commit changes
+    nlcq_connect.commit()
+
+	#close the DB connection
+    nlcq_connect.close()
 
 #######################################################################################################################
 
