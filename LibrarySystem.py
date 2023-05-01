@@ -431,7 +431,7 @@ def borrowerInfoQuery(borrower_id, name):
         if (all_output is None):
             print_record += str("No Records Found! \n")
         else:
-            print_record += str("Displaying all borrower info: \n")
+            print_record += str("Displaying all borrower info: \n\n")
             while all_output is not None:
                 print(all_output)
                 if (all_output[2] == 0):
@@ -448,7 +448,7 @@ def borrowerInfoQuery(borrower_id, name):
         if (name_output is None):
             print_record += str("No Records Found with Name: {}!\n".format(name))
         else:
-            print_record += str("Displaying all borrower info containing the name {} \n".format(name))
+            print_record += str("Displaying all borrower info containing the name {} \n\n".format(name))
             while name_output is not None:
                 if (name_output[2] == 0):
                     print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(name_output[0], name_output[1], name_output[2]))
@@ -463,12 +463,11 @@ def borrowerInfoQuery(borrower_id, name):
         if (id_output is None):
             print_record += str("No Records Found with ID Number: {}!\n".format(borrower_id))
         else:
-            print_record += str("Displaying borrower with ID number: {}\n".format(borrower_id))
+            print_record += str("Displaying borrower with ID number: {}\n\n".format(borrower_id))
             if (id_output[2] == 0):
                 print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(id_output[0], id_output[1], id_output[2]))
             else:
                 print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}0\n".format(id_output[0], id_output[1], id_output[2]))
-
 
     # Output updates onto interface
     label = Label(listBorrowerFrame, text = print_record)
