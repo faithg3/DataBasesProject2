@@ -433,7 +433,6 @@ def borrowerInfoQuery(borrower_id, name):
         else:
             print_record += str("Displaying all borrower info: \n\n")
             while all_output is not None:
-                print(all_output)
                 if (all_output[2] == 0):
                     print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(all_output[0], all_output[1], all_output[2]))
                 else:
