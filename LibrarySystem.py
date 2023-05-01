@@ -6,7 +6,7 @@ import sqlite3
 #                                                FRAME INTERFACES
 #######################################################################################################################
 
-#                                          CHECK OUT BOOK FRAME INTERFACE
+#                                        1.  CHECK OUT BOOK FRAME INTERFACE
 def CheckOutBookInterface():
     #create text boxes
     info = Label(checkOutBookFrame, text = 'Enter the Book ID, Branch ID, and Library Card to check out a book!')
@@ -37,7 +37,7 @@ def CheckOutBookInterface():
     checkout_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
-#                                 GET LIBRARY CARD FRAME INTERFACE  (ADD NEW BORROWER)
+#                                2.  GET LIBRARY CARD FRAME INTERFACE  (ADD NEW BORROWER)
 def GetLibraryCardInterface():
     # create text boxes and labels
     info = Label(getLibraryCardFrame, text = 'Enter Name, Address, and Phone # to get a new library card!')
@@ -62,7 +62,7 @@ def GetLibraryCardInterface():
     getLibCard_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
-#                                          ADD NEW BOOK FRAME INTERFACE
+#                                         3.  ADD NEW BOOK FRAME INTERFACE
 def AddNewBookInterface():
     info = Label(addNewBookFrame, text='Enter the Book Title and Publisher to add new book to each branch!')
     info.grid(row=0, column=1, pady=20)
@@ -88,7 +88,7 @@ def AddNewBookInterface():
 
 
 
-#                                      CHECK BOOK AVALIABLITY FRAME INTERFACE
+#                                    4.  CHECK BOOK AVALIABLITY FRAME INTERFACE
 def CheckBookAvaliabilityInterface():
     info = Label(checkBookAvaliabilityFrame, text='Enter the Book Title to see its avaliability!')
     info.grid(row=0, column=1, pady=20)
@@ -103,7 +103,7 @@ def CheckBookAvaliabilityInterface():
 
 
 
-#                                          CHECK LATE BOOKS FRAME INTERFACE
+#                                       5.   CHECK LATE BOOKS FRAME INTERFACE
 def CheckLateBooksInterface():
     info = Label(checkLateBooksFrame, text='Enter a date range to see which books were returned late!')
     info.grid(row=0, column=1, pady=20)
@@ -121,7 +121,7 @@ def CheckLateBooksInterface():
     checkLateBooks_btn = Button(checkLateBooksFrame, text ='View Late Books ')
     checkLateBooks_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
-#                                           LIST BORROWER FRAME INTERFACE
+#                                       6.a. LIST BORROWER FRAME INTERFACE
 def listBorrowerInterface():
     # create text boxes and labels
     infoLabelText = 'Search Borrowers\' late fees!\nEnter a borrower\'s ID or name to filter search results.'
@@ -139,11 +139,11 @@ def listBorrowerInterface():
     name_label.grid(row =2, column = 0)
 
     # create buttons
-    listBorrowers_btn = Button(listBorrowerFrame, text ='View Borrowers ')
+    listBorrowers_btn = Button(listBorrowerFrame, text ='View Borrowers ', command=lambda:borrowerInfoQuery(borrower_id.get(), name.get()))
     listBorrowers_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
 
 
-#                                             LIST BOOK FRAME INTERFACE
+#                                        6.b. LIST BOOK FRAME INTERFACE
 def listBookInterface():
     # create text boxes and labels
     infoLabelText = 'Search Book Information!\nEnter the Book ID, Book Title to filter search results.'
@@ -175,7 +175,7 @@ def listBookInterface():
 #                                                  BUTTON FUNCTIONS
 #######################################################################################################################
 
-#                                                CHECK OUT BOOK BUTTON
+#                                              1.  CHECK OUT BOOK BUTTON
 def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     # create connection and cursor to the DB
     bcq_connect = sqlite3.connect('LMS.sqlite')
@@ -251,7 +251,7 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_connect.close()
 
 
-#                                               NEW LIBRARY CARD BUTTON
+#                                          2.  NEW LIBRARY CARD BUTTON
 def newLibraryCardQuery(Name, Address, Phone):
     # create connection and cursor to the DB
     nlcq_connect = sqlite3.connect('LMS.sqlite')
@@ -288,7 +288,7 @@ def newLibraryCardQuery(Name, Address, Phone):
     nlcq_connect.close()
 
 
-#                                                 ADD NEW BOOK BUTTON
+#                                            3.  ADD NEW BOOK BUTTON
 def addNewBookQuery(title, publisher, author):
     # create connection and cursor to the DB
     nbq_connect = sqlite3.connect('LMS.sqlite')
@@ -367,7 +367,7 @@ def addNewBookQuery(title, publisher, author):
     nbq_connect.close()
 
 
-#                                               COPIES LOANED OUT BUTTON
+#                                            4.  COPIES LOANED OUT BUTTON
 def copies_loaned_out_query(book_title):
     conn = sqlite3.connect('LMS.sqlite')
     cur = conn.cursor()
@@ -409,15 +409,64 @@ def copies_loaned_out_query(book_title):
     conn.close()
 
 
-#                                                  LATE BOOKS BUTTON
+#                                             5.  LATE BOOKS BUTTON
 # def lateBooksQuery()
 
 
-#                                                BORROWER INFO BUTTON
-# def borrowerInfoQuery()
+#                                             6.a. BORROWER INFO BUTTON
+def borrowerInfoQuery(borrower_id, name):
+    # create connection and cursor to the DB
+    conn = sqlite3.connect('LMS.sqlite')
+    cur = conn.cursor()
+
+    # sql statments
+    sql_search_by_id = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Card_No = ?"
+    sql_search_by_name = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Borrower_Name LIKE ? COLLATE NOCASE ORDER BY LateFeeBalance DESC"
+    sql_search_all = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo ORDER BY LateFeeBalance DESC"
+
+    print_record = ''
+    # display all records if nothing is entered in either text boxes
+    if (len(borrower_id) == 0) and (len(name) == 0):
+        cur.execute(sql_search_all)
+        all_output = cur.fetchone()
+        print_record += str("Displaying all borrower info: \n")
+
+        while all_output is not None:
+            print_record += str("{}: {}: {}\n".format(all_output[0], all_output[1], all_output[2]))
+            all_output = cur.fetchone()
+    # search by name if something is entered in the name text box and nothing in the borrower_id
+    elif (len(borrower_id) == 0) and (len(name) != 0):
+        string_name = ("\'%" + name + "%\'")
+        val_output = (string_name,)
+        cur.execute(sql_search_by_name, val_output)
+        name_output = cur.fetchone()
+        print_record += str("Displaying all borrower info containing the name {} \n".format(name))
+
+        while name_output is not None:
+            print_record += str("{}: {}: {}\n".format(name_output[0], name_output[1], name_output[2]))
+            name_output = cur.fetchone()
+    # search by id if something is in the id text box
+    elif((len(borrower_id) != 0) and (len(name) == 0)) or ((len(borrower_id) != 0) and (len(name) != 0)):
+        val_output = (borrower_id,)
+        cur.execute(sql_search_by_id, val_output)
+        id_output = cur.fetchone()
+        print_record += str("Displaying borrower with ID number: {} \n".format(borrower_id))
+        print_record += str("{}: {}: {}\n".format(id_output[0], id_output[1], id_output[2]))
+        # for id_output in id_output:
+        #     print_record += str("{}, {}, {}\n".format(id_output[0], id_output[1], id_output[2]))
+
+    # Output updates onto interface
+    label = Label(listBorrowerFrame, text = print_record)
+    label.grid(row = 9, column = 0, columnspan = 2)
+
+    # Message disappears after 5 seconds
+    label.after(5000, label.destroy)
+
+    # Close the connection
+    conn.close()
 
 
-#                                                  BOOK INFO BUTTON
+#                                              6.b.BOOK INFO BUTTON
 # def bookInfoQuery()
 
 
@@ -436,7 +485,7 @@ def copies_loaned_out_query(book_title):
 # create tkinter window
 root = Tk()
 root.title('LibrarySystem')
-root.geometry("700x500")
+root.geometry("700x600")
 
 library_system_connect = sqlite3.connect('LMS.sqlite')
 library_system_cur = library_system_connect.cursor()
