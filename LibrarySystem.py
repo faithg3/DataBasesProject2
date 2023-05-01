@@ -5,6 +5,15 @@ import sqlite3
 #######################################################################################################################
 #                                                FRAME INTERFACES
 #######################################################################################################################
+#                                        1.  CHECK OUT BOOK FRAME INTERFACE
+def homeInterface():
+    #create text boxes
+    info = Label(homeFrame, text = 'Welcome to Our Library Management System!',font=("Arial", 25))
+    info.grid(row = 0, column = 1, pady = 20)
+
+    creators = Label(homeFrame, text = 'Created by: \nMuhammad Muawiz Farooqi \nTahera Fatima\n and Faith Gutierrez', font=("Arial", 15))
+    creators.grid(row = 1, column = 1, pady = 20)
+
 
 #                                        1.  CHECK OUT BOOK FRAME INTERFACE
 def CheckOutBookInterface():
@@ -433,7 +442,6 @@ def borrowerInfoQuery(borrower_id, name):
         else:
             print_record += str("Displaying all borrower info: \n\n")
             while all_output is not None:
-                print(all_output)
                 if (all_output[2] == 0):
                     print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(all_output[0], all_output[1], all_output[2]))
                 else:
@@ -509,6 +517,7 @@ lbdb_notebook = ttk.Notebook(root)
 lbdb_notebook.pack(pady=15)
 
 # creating frames
+homeFrame = Frame(lbdb_notebook, width=500, height=500)
 checkOutBookFrame = Frame(lbdb_notebook, width=500, height=500)
 getLibraryCardFrame = Frame(lbdb_notebook, width=500)
 addNewBookFrame = Frame(lbdb_notebook, width=500, height=500)
@@ -518,6 +527,7 @@ listBorrowerFrame = Frame(lbdb_notebook, width=500, height=500)
 listBookFrame = Frame(lbdb_notebook, width=500, height=500)
 
 # packing frames
+homeFrame.pack(fill="both", expand=1)
 checkOutBookFrame.pack(fill="both", expand=1)
 getLibraryCardFrame.pack(fill="both", expand=1)
 addNewBookFrame.pack(fill="both", expand=1)
@@ -527,6 +537,7 @@ listBorrowerFrame.pack(fill="both", expand=1)
 listBookFrame.pack(fill="both", expand=1)
 
 # adding frames to notebook
+lbdb_notebook.add(homeFrame, text = "Home")
 lbdb_notebook.add(checkOutBookFrame, text = "Check Out Book")
 lbdb_notebook.add(getLibraryCardFrame, text = "Get Library Card")
 lbdb_notebook.add(addNewBookFrame, text = "Add New Book")
@@ -536,6 +547,7 @@ lbdb_notebook.add(listBorrowerFrame, text = "Borrower Search")
 lbdb_notebook.add(listBookFrame, text = "Book Search")
 
 # Frame Interfaces
+homeInterface()
 CheckOutBookInterface()
 GetLibraryCardInterface()
 AddNewBookInterface()
