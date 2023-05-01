@@ -418,42 +418,57 @@ def borrowerInfoQuery(borrower_id, name):
     # create connection and cursor to the DB
     conn = sqlite3.connect('LMS.sqlite')
     cur = conn.cursor()
-
     # sql statments
-    sql_search_by_id = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Card_No = ?"
-    sql_search_by_name = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Borrower_Name LIKE ? COLLATE NOCASE ORDER BY LateFeeBalance DESC"
-    sql_search_all = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo ORDER BY LateFeeBalance DESC"
+    sql_search_by_id = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Card_No = ?;"
+    sql_search_by_name = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo WHERE Borrower_Name LIKE ? COLLATE NOCASE ORDER BY LateFeeBalance DESC;"
+    sql_search_all = "SELECT Card_No, Borrower_Name, LateFeeBalance FROM vBookLoanInfo ORDER BY LateFeeBalance DESC;"
 
     print_record = ''
     # display all records if nothing is entered in either text boxes
     if (len(borrower_id) == 0) and (len(name) == 0):
         cur.execute(sql_search_all)
         all_output = cur.fetchone()
-        print_record += str("Displaying all borrower info: \n")
-
-        while all_output is not None:
-            print_record += str("{}: {}: {}\n".format(all_output[0], all_output[1], all_output[2]))
-            all_output = cur.fetchone()
+        if (all_output is None):
+            print_record += str("No Records Found! \n")
+        else:
+            print_record += str("Displaying all borrower info: \n")
+            while all_output is not None:
+                print(all_output)
+                if (all_output[2] == 0):
+                    print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(all_output[0], all_output[1], all_output[2]))
+                else:
+                    print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}0\n".format(all_output[0], all_output[1], all_output[2]))
+                all_output = cur.fetchone()
     # search by name if something is entered in the name text box and nothing in the borrower_id
     elif (len(borrower_id) == 0) and (len(name) != 0):
-        string_name = ("\'%" + name + "%\'")
+        string_name = ("%" + name + "%")
         val_output = (string_name,)
         cur.execute(sql_search_by_name, val_output)
         name_output = cur.fetchone()
-        print_record += str("Displaying all borrower info containing the name {} \n".format(name))
-
-        while name_output is not None:
-            print_record += str("{}: {}: {}\n".format(name_output[0], name_output[1], name_output[2]))
-            name_output = cur.fetchone()
+        if (name_output is None):
+            print_record += str("No Records Found with Name: {}!\n".format(name))
+        else:
+            print_record += str("Displaying all borrower info containing the name {} \n".format(name))
+            while name_output is not None:
+                if (name_output[2] == 0):
+                    print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(name_output[0], name_output[1], name_output[2]))
+                else:
+                    print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}0\n".format(name_output[0], name_output[1], name_output[2]))
+                name_output = cur.fetchone()
     # search by id if something is in the id text box
     elif((len(borrower_id) != 0) and (len(name) == 0)) or ((len(borrower_id) != 0) and (len(name) != 0)):
         val_output = (borrower_id,)
         cur.execute(sql_search_by_id, val_output)
         id_output = cur.fetchone()
-        print_record += str("Displaying borrower with ID number: {} \n".format(borrower_id))
-        print_record += str("{}: {}: {}\n".format(id_output[0], id_output[1], id_output[2]))
-        # for id_output in id_output:
-        #     print_record += str("{}, {}, {}\n".format(id_output[0], id_output[1], id_output[2]))
+        if (id_output is None):
+            print_record += str("No Records Found with ID Number: {}!\n".format(borrower_id))
+        else:
+            print_record += str("Displaying borrower with ID number: {}\n".format(borrower_id))
+            if (id_output[2] == 0):
+                print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}.00\n".format(id_output[0], id_output[1], id_output[2]))
+            else:
+                print_record += str("ID: {}    Name: {}    Late Fee Balance: ${}0\n".format(id_output[0], id_output[1], id_output[2]))
+
 
     # Output updates onto interface
     label = Label(listBorrowerFrame, text = print_record)
@@ -529,123 +544,6 @@ CheckBookAvaliabilityInterface()
 CheckLateBooksInterface()
 listBorrowerInterface()
 listBookInterface()
-
-
-
-
-
-# address_book_cur.execute('''CREATE TABLE addresses(
-# 							first_name text,
-# 							last_name text,
-# 							street text,
-# 							city text,
-# 							state text,
-# 							zipcode integer)''')
-
-
-# def submit():
-# 	submit_conn = sqlite3.connect('address_book.db')
-#
-# 	submit_cur = submit_conn.cursor()
-#
-# 	submit_cur.execute("INSERT INTO ADDRESSES VALUES (:fname, :lname, :street, :city, :state, :zcode) ",
-# 		{
-# 			'fname': f_name.get(),
-# 			'lname': l_name.get(),
-# 			'street': street.get(),
-# 			'city': city.get(),
-# 			'state': state.get(),
-# 			'zcode': zipcode.get()
-# 		})
-#
-# 	#commit changes
-#
-# 	submit_conn.commit()
-# 	#close the DB connection
-# 	submit_conn.close()
-
-
-
-# def input_query():
-#
-# 	iq_conn = sqlite3.connect('address_book.db')
-#
-# 	iq_cur = iq_conn.cursor()
-#
-# 	iq_cur.execute("SELECT first_name, last_name FROM ADDRESSES WHERE state = ? AND city = ?",
-# 						(state.get(), city.get(),))
-#
-# 	output_records = iq_cur.fetchall()
-#
-# 	print_record = ''
-#
-# 	for output_record in output_records:
-# 		print_record += str(output_record[0]+ " " + output_record[1]+"\n")
-#
-# 	iq_label = Label(root, text = print_record)
-#
-# 	iq_label.grid(row = 9, column = 0, columnspan = 2)
-#
-# 	#commit changes
-#
-# 	iq_conn.commit()
-# 	#close the DB connection
-# 	iq_conn.close()
-
-
-#building the gui components
-	# pack place grid
-
-	# create text boxes
-
-# f_name = Entry(root, width = 30)
-# f_name.grid(row = 0, column = 1, padx = 20)
-#
-#
-# l_name = Entry(root, width = 30)
-# l_name.grid(row = 1, column = 1)
-#
-# street= Entry(root, width = 30)
-# street.grid(row = 2, column = 1)
-#
-# city = Entry(root, width = 30)
-# city.grid(row = 3, column = 1)
-#
-# state = Entry(root, width = 30)
-# state.grid(row = 4, column = 1)
-#
-# zipcode= Entry(root, width = 30)
-# zipcode.grid(row = 5, column = 1)
-#
-# 	#create label
-#
-# f_name_label = Label(root, text = 'First Name: ')
-# f_name_label.grid(row =0, column = 0)
-#
-# l_name_label = Label(root, text = 'Last Name: ')
-# l_name_label.grid(row =1, column = 0)
-#
-# street_label = Label(root, text = 'Street: ')
-# street_label.grid(row =2, column = 0)
-#
-# city_label = Label(root, text = 'City: ')
-# city_label.grid(row =3, column = 0)
-#
-# state_label = Label(root, text = 'State: ')
-# state_label.grid(row =4, column = 0)
-#
-# zcode_label = Label(root, text = 'Zipcode: ')
-# zcode_label.grid(row =5, column = 0)
-#
-#
-# submit_btn = Button(root, text ='Add Contact ', command = submit)
-# submit_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
-#
-# input_qry_btn = Button(root, text = 'Output Names', command = input_query)
-# input_qry_btn.grid(row = 8, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
-
-
-
 
 #executes tinker components
 root.mainloop()
