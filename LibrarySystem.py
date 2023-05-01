@@ -258,7 +258,7 @@ def newLibraryCardQuery(Name, Address, Phone):
     nlcq_cursor = nlcq_connect.cursor()
 
     # Insert Borrower into BORROWER
-    sql_insert = "INSERT INTO Borrower(Name, Address, Phone) VALUES (?, ?, ?)"
+    sql_insert = "INSERT INTO Borrower(Name, Address, Phone) VALUES (?, ?, ?);"
     val_insert = (Name.get(), Address.get(), Phone.get(),)
     nlcq_cursor.execute(sql_insert, val_insert)
 
@@ -266,7 +266,7 @@ def newLibraryCardQuery(Name, Address, Phone):
     nlcq_connect.commit()
 
     # Get new Card_No from Borrower
-    sql_output = "SELECT Card_No FROM Borrower WHERE Name=? AND Address=? AND Phone=?"
+    sql_output = "SELECT Card_No FROM Borrower WHERE Name=? AND Address=? AND Phone=?;"
     val_output = (Name.get(), Address.get(), Phone.get(),)
     nlcq_cursor.execute(sql_output, val_output)
 
@@ -348,7 +348,7 @@ def addNewBookQuery(title, publisher, author):
         print_record += str('Added {} as an author of \"{}\"!\n'.format(author, title))
 
         # Add 5 copies of the book into each branch in Book_Copies
-        sql_add_copies = "INSERT INTO Book_Copies VALUES (?, 1, 5), (?, 2, 5), (?, 3, 5), (?, 4, 5), (?, 5, 5);"
+        sql_add_copies = "INSERT INTO Book_Copies VALUES (?, 1, 5), (?, 2, 5), (?, 3, 5);"
         val_add_copies = (book_id, book_id, book_id, book_id, book_id,)
         nbq_cursor.execute(sql_add_copies, val_add_copies)
         print_record += str('Added 5 copies of \"{}\" to each branch!\n'.format(title))
