@@ -28,6 +28,7 @@ Our app has 7 database management features:
 - **Check Book Avaliability:**
 - **View Late Books:**
 - **Search for Library Card Holders:**
+
 Here, the user can find Library Card Holders name, card number, and late balance fee
 They can either search by name,
 
