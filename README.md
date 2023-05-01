@@ -30,10 +30,14 @@ Our app has 7 database management features:
 - **Search for Library Card Holders:**
 
 Here, the user can find Library Card Holders name, card number, and late balance fee
+
 They can either search by name,
-![image](https://user-images.githubusercontent.com/94029910/235533068-a41b177a-f7ff-4e1a-8976-6eeb23985090.png)
+![image](https://user-images.githubusercontent.com/94029910/235533342-80e6da5e-7821-411e-aa63-6032c29a6dea.png)
+
 card number,
+![image](https://user-images.githubusercontent.com/94029910/235533225-3f8b01da-d1d5-40cf-af75-b095257f8951.png)
 
 or simply view all library card holders
+![image](https://user-images.githubusercontent.com/94029910/235533068-a41b177a-f7ff-4e1a-8976-6eeb23985090.png)
 
 - **Search for Books:**
