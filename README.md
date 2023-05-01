@@ -22,12 +22,12 @@ Welcome to our library management system project! We are excited to introduce ou
 
 ### Features
 Our app has 7 database management features:
-- Check out a Book:
-- Get a Library Card:
-- Add a New Book to the Database:
-- Check Book Avaliability:
-- View Late Books:
-- Search for Library Card Holders:
+- **Check out a Book:**
+- **Get a Library Card:**
+- **Add a New Book to the Database:**
+- **Check Book Avaliability:**
+- **View Late Books:**
+- **Search for Library Card Holders:**
 Here, the user can find Library Card Holders name, card number, and late balance fee
 They can either search by name,
 
@@ -35,4 +35,4 @@ card number,
 
 or simply view all library card holders
 
-- Search for Books:
+- **Search for Books:**
