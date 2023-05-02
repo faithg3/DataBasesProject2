@@ -5,7 +5,7 @@ import sqlite3
 #######################################################################################################################
 #                                                FRAME INTERFACES
 #######################################################################################################################
-#                                        1.  CHECK OUT BOOK FRAME INTERFACE
+#                                            0.  HOME FRAME INTERFACE
 def homeInterface():
     #create text boxes
     info = Label(homeFrame, text = 'Welcome to Our Library Management System!',font=("Arial", 25))
@@ -117,18 +117,28 @@ def CheckLateBooksInterface():
     info = Label(checkLateBooksFrame, text='Enter a date range to see which books were returned late!')
     info.grid(row=0, column=1, pady=20)
 
-    date_start = Entry(checkLateBooksFrame, width = 30)
-    date_start.grid(row = 1, column = 1, padx = 20)
-    date_start_label = Label(checkLateBooksFrame, text = 'Start Date: ')
-    date_start_label.grid(row =1, column = 0)
+    date_start = Entry(checkLateBooksFrame, width=30)
+    date_start.grid(row=1, column=1, padx=20)
+    date_start_label = Label(checkLateBooksFrame, text='Start Date: ')
+    date_start_label.grid(row=1, column=0)
 
-    date_end = Entry(checkLateBooksFrame, width = 30)
-    date_end.grid(row = 2, column = 1, padx = 20)
-    date_end_label = Label(checkLateBooksFrame, text = 'Start End: ')
-    date_end_label.grid(row =2, column = 0)
+    date_end = Entry(checkLateBooksFrame, width=30)
+    date_end.grid(row=2, column=1, padx=20)
+    date_end_label = Label(checkLateBooksFrame, text='End Date: ')
+    date_end_label.grid(row=2, column=0)
 
-    checkLateBooks_btn = Button(checkLateBooksFrame, text ='View Late Books ')
-    checkLateBooks_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+    results_box = Listbox(checkLateBooksFrame, width=100)
+    results_box.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+    def show_results():
+        results_box.delete(0, END)
+        results = lateBooksQuery(date_start.get(), date_end.get())
+        for row in results:
+            row = str('Book Title: ' + row[0].ljust(40, ' ') + 'Days Late: ' + str(int(row[1])))
+            results_box.insert(END, row)
+
+    checkLateBooks_btn = Button(checkLateBooksFrame, text='View Late Books', command=show_results)
+    checkLateBooks_btn.grid(row=4, column=0, columnspan=2, pady=10, padx=10, ipadx=140)
 
 #                                       6.a. LIST BORROWER FRAME INTERFACE
 def listBorrowerInterface():
@@ -303,7 +313,7 @@ def addNewBookQuery(title, publisher, author):
     nbq_connect = sqlite3.connect('LMS.sqlite')
     nbq_cursor = nbq_connect.cursor()
 
-    # Check if entered new publisher entered
+    # Check if new publisher entered
     sql_check_publisher = "SELECT EXISTS (SELECT 1 FROM PUBLISHER WHERE Publisher_Name=? COLLATE NOCASE);"
     val_check_publisher = (publisher,)
     nbq_cursor.execute(sql_check_publisher, val_check_publisher)
@@ -342,7 +352,7 @@ def addNewBookQuery(title, publisher, author):
     author_exists = nbq_cursor.fetchone()
     author_exists = author_exists[0]
 
-    # Print eror message if duplicate addition
+    # Print error message if duplicate addition
     if author_exists == 1:
         print_record += str('{} by {} has already been added in the database!\n'.format(title, author))
 
@@ -419,7 +429,19 @@ def copies_loaned_out_query(book_title):
 
 
 #                                             5.  LATE BOOKS BUTTON
-# def lateBooksQuery()
+def lateBooksQuery(date_start, date_end):
+    conn = sqlite3.connect('LMS.sqlite')
+    c = conn.cursor()
+
+    sql_input_lbq = 'SELECT b.title, julianday(bl.Returned_Date) - julianday(bl.due_date) AS days_late '\
+                    'FROM BOOK_LOANS AS bl NATURAL JOIN BOOK AS b WHERE bl.Returned_Date > bl.due_date AND bl.due_date >= ? AND bl.due_date <= ?;'
+    val_input_lbq = (date_start, date_end)
+    c.execute(sql_input_lbq, val_input_lbq)
+
+    result = c.fetchall()
+
+    conn.close()
+    return result
 
 
 #                                             6.a. BORROWER INFO BUTTON
