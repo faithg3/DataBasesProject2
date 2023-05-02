@@ -206,11 +206,12 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     bcq_cursor.execute(sql_check_copies, val_check_copies)
 
     valid_copies = bcq_cursor.fetchone()
-    valid_copies = valid_copies[0]
     print_record = ''
 
+    print('valid copies = {}'.format(valid_copies))
+
     # Print message if not enough copies available
-    if not valid_copies:
+    if valid_copies is None or valid_copies[0] == 0:
         print_record += str('Not enough copies of Book ID {} available at Branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
     
     else:
@@ -221,8 +222,6 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
 
         info_exists = bcq_cursor.fetchone()
         info_exists = info_exists[0]
-
-        print('info exists : {}'.format(info_exists))
 
         # Print message if duplicate information entered
         if info_exists == 1:
@@ -250,18 +249,18 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
 
             output_records = bcq_cursor.fetchall()
 
+            print_record += str('Checkout successful!\n')
+
             # Output updates onto interface
             for output_record in output_records:
-                print_record += str("Book_ID:      " + str(output_record[0]) + '\n')
-                print_record += str("Branch_ID:    " + str(output_record[1]) + '\n')
-                print_record += str("No_Of_Copies: " + str(output_record[2]) + '\n')
+                print_record += str('There are {} copies of book ID #{} remaining at branch {}.\n'.format(output_record[2], output_record[0], output_record[1]))
 
     # Output updates onto interface
     bcq_label = Label(checkOutBookFrame, text = print_record)
     bcq_label.grid(row = 9, column = 0, columnspan = 2)
 
-    # Message disappears after 5 seconds
-    bcq_label.after(5000, bcq_label.destroy)
+    # Message disappears after 7 seconds
+    bcq_label.after(7000, bcq_label.destroy)
 
 	#commit changes
     bcq_connect.commit()
@@ -421,8 +420,8 @@ def copies_loaned_out_query(book_title):
     label = Label(checkBookAvaliabilityFrame, text = print_record)
     label.grid(row = 9, column = 0, columnspan = 2)
 
-    # Message disappears after 5 seconds
-    label.after(5000, label.destroy)
+    # Message disappears after 7 seconds
+    label.after(7000, label.destroy)
 
     # Close the connection
     conn.close()
@@ -503,8 +502,8 @@ def borrowerInfoQuery(borrower_id, name):
     label = Label(listBorrowerFrame, text = print_record)
     label.grid(row = 9, column = 0, columnspan = 2)
 
-    # Message disappears after 5 seconds
-    label.after(5000, label.destroy)
+    # Message disappears after 7 seconds
+    label.after(7000, label.destroy)
 
     # Close the connection
     conn.close()
