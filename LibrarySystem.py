@@ -165,23 +165,32 @@ def listBorrowerInterface():
 #                                        6.b. LIST BOOK FRAME INTERFACE
 def listBookInterface():
     # create text boxes and labels
-    infoLabelText = 'Search Book Information!\nEnter the Book ID, Book Title to filter search results.'
-    info = Label(listBookFrame, text = infoLabelText)
-    info.grid(row = 0, column = 1, pady = 20)
+    infoLabelText = 'Search Book Information!\nEnter the Book ID, Book Title or part of Book Title to filter search results.'
+    info = Label(listBookFrame, text=infoLabelText)
+    info.grid(row=0, column=1, pady=20)
 
-    book_id = Entry(listBookFrame, width = 30)
-    book_id.grid(row = 1, column = 1)
-    book_id_label = Label(listBookFrame, text = 'Borrower ID: ')
-    book_id_label.grid(row =1, column = 0)
+    book_id = Entry(listBookFrame, width=30)
+    book_id.grid(row=1, column=1)
+    book_id_label = Label(listBookFrame, text='Book ID:')
+    book_id_label.grid(row=1, column=0)
 
-    title = Entry(listBookFrame, width = 30)
-    title.grid(row = 2, column = 1)
-    title_label = Label(listBookFrame, text = 'Book Title: ')
-    title_label.grid(row =2, column = 0)
+    title = Entry(listBookFrame, width=30)
+    title.grid(row=2, column=1)
+    title_label = Label(listBookFrame, text='Book Title:')
+    title_label.grid(row=2, column=0)
+
+    results_box = Listbox(listBookFrame, width=100)
+    results_box.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+    def show_results():
+        results_box.delete(0, END)
+        results = bookInfoQuery(book_id.get(), title.get())
+        for row in results:
+            results_box.insert(END, f"Book ID: {row[0]}, Title: {row[1]}, Late Fee: {row[2]}, Author Name: {row[3]}, Publisher Name: {row[4]}")
 
     # create buttons
-    listBorrowers_btn = Button(listBookFrame, text ='Search Book Information ')
-    listBorrowers_btn.grid(row = 7, column =0, columnspan = 2, pady = 10, padx = 10, ipadx = 140)
+    listBorrowers_btn = Button(listBookFrame, text='Search Book Information', command=show_results)
+    listBorrowers_btn.grid(row=7, column=0, columnspan=2, pady=10, padx=10, ipadx=140)
 
 
 #######################################################################################################################
@@ -508,11 +517,48 @@ def borrowerInfoQuery(borrower_id, name):
 
 
 #                                              6.b.BOOK INFO BUTTON
-# def bookInfoQuery()
+def bookInfoQuery(book_id, title):
+    # get user input
+    search_criteria = "%" + title + "%"
+    params = (book_id, search_criteria, search_criteria)
 
+    # execute SQL query
+    conn = sqlite3.connect('LMS.sqlite')
+    c = conn.cursor()
+    c.execute("""
+        SELECT
+    book.book_id AS "Book ID",
+    book.title AS "Title",
+    CASE
+        WHEN book_loans.Returned_Date IS NULL THEN (julianday('now') - julianday(book_loans.due_date)) * 0.25
+        ELSE 0
+    END AS "Late Fee",
+    book_authors.author_name AS "Author Name",
+    publisher.publisher_name AS "Publisher Name"
+FROM book
+LEFT JOIN BOOK_AUTHORS ON book.book_id = BOOK_AUTHORS.book_id
+LEFT JOIN book_loans ON book.book_id = book_loans.book_id
+LEFT JOIN publisher ON book.publisher_name = publisher.publisher_name
+WHERE book.book_id LIKE ? OR book.title LIKE ? OR book.title LIKE ?
+ORDER BY "Late Fee" DESC NULLS LAST
 
+    """, params)
+    results = c.fetchall()
 
+    # close database connection
+    conn.close()
 
+    # format results
+    formatted_results = []
+    for row in results:
+        late_fee = row[2]
+        if late_fee is None:
+            late_fee = "Non-Applicable"
+        else:
+            late_fee = "${:.2f}".format(late_fee)
+        formatted_results.append((row[0], row[1], late_fee, row[3], row[4]))
+
+    return formatted_results
 
 #######################################################################################################################
 
