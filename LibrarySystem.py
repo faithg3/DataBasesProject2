@@ -208,8 +208,6 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
     valid_copies = bcq_cursor.fetchone()
     print_record = ''
 
-    print('valid copies = {}'.format(valid_copies))
-
     # Print message if not enough copies available
     if valid_copies is None or valid_copies[0] == 0:
         print_record += str('Not enough copies of Book ID {} available at Branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
@@ -225,7 +223,7 @@ def bookCheckoutQuery(Book_Id, Branch_Id, Card_No):
 
         # Print message if duplicate information entered
         if info_exists == 1:
-            print_record += str('You have already checked out book {} from branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
+            print_record += str('You have already checked out a copy of book {} from branch {}\n'.format(Book_Id.get(), Branch_Id.get()))
 
         # Update DB if unique information entered
         else:
@@ -367,7 +365,7 @@ def addNewBookQuery(title, publisher, author):
 
         # Add 5 copies of the book into each branch in Book_Copies
         sql_add_copies = "INSERT INTO Book_Copies VALUES (?, 1, 5), (?, 2, 5), (?, 3, 5);"
-        val_add_copies = (book_id, book_id, book_id, book_id, book_id,)
+        val_add_copies = (book_id, book_id, book_id, )
         nbq_cursor.execute(sql_add_copies, val_add_copies)
         print_record += str('Added 5 copies of \"{}\" to each branch!\n'.format(title))
 
